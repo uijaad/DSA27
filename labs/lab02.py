@@ -28,7 +28,17 @@ def classify_triangle(a, b, c):
     classify_triangle(3, 4, 5)  -> "scalene"
     classify_triangle(1, 2, 3)  -> ValueError   (1 + 2 is not > 3)
     """
-    raise NotImplementedError
+    sides = (a, b, c)
+    if any(side <= 0 for side in sides):
+        raise ValueError("triangle sides must be positive")
+    if any(side >= sum(sides) - side for side in sides):
+        raise ValueError("triangle inequality violated")
+    if a == b == c:
+        return "equilateral"
+    if a == b or a == c or b == c:
+        return "isosceles"
+    return "scalene"
+    
 
 
 def course_result(coursework, final, attendance):
@@ -50,7 +60,17 @@ def course_result(coursework, final, attendance):
     course_result(38, 15, 100) -> "fail"     total 53, and final under 18
     course_result(40, 60, 70)  -> "barred"
     """
-    raise NotImplementedError
+    if not 0 <= coursework <= 40:
+        raise ValueError("coursework must be between 0 and 40")
+    if not 0 <= final <= 60:
+        raise ValueError("final must be between 0 and 60")
+    if not 0 <= attendance <= 100:
+        raise ValueError("attendance must be between 0 and 100")
+    if attendance < 75:
+        return "barred"
+    if final < 18 or coursework + final < 60:
+        return "fail"
+    return "pass"
 
 
 # -- loops ------------------------------------------------------------------
@@ -65,7 +85,17 @@ def fizzbuzz(n):
     fizzbuzz(5)  -> ["1", "2", "Fizz", "4", "Buzz"]
     fizzbuzz(0)  -> []
     """
-    raise NotImplementedError
+    result = []
+    for number in range(1, n + 1):
+        if number % 15 == 0:
+            result.append("FizzBuzz")
+        elif number % 3 == 0:
+            result.append("Fizz")
+        elif number % 5 == 0:
+            result.append("Buzz")
+        else:
+            result.append(str(number))
+    return result
 
 
 def is_prime(n):
@@ -76,7 +106,14 @@ def is_prime(n):
 
     is_prime(2) -> True ;  is_prime(9) -> False ;  is_prime(97) -> True
     """
-    raise NotImplementedError
+    if n < 2:
+        return False
+    divisor = 2
+    while divisor * divisor <= n:
+        if n % divisor == 0:
+            return False
+        divisor += 1
+    return True
 
 
 def primes_below(n):
@@ -85,7 +122,7 @@ def primes_below(n):
     primes_below(10) -> [2, 3, 5, 7]
     primes_below(2)  -> []
     """
-    raise NotImplementedError
+    return [number for number in range(2, n) if is_prime(number)]
 
 
 def first_repeated(values):
@@ -99,7 +136,11 @@ def first_repeated(values):
     Use loops and `break` or an early `return`. (In Lab 03 you will do this
     again with a set, and it will be much faster.)
     """
-    raise NotImplementedError
+    for index, value in enumerate(values):
+        for previous in values[:index]:
+            if value == previous:
+                return value
+    return None
 
 
 def count_pairs(n):
@@ -115,7 +156,7 @@ def count_pairs(n):
     gives the same answer without looping, and use that instead. Both pass —
     only one of them is O(1).
     """
-    raise NotImplementedError
+    return n * (n - 1) // 2
 
 
 def calculator(command):
@@ -135,7 +176,26 @@ def calculator(command):
     calculator("sum 1 2 3 4") -> 10
     calculator("div 1 2")     -> ValueError
     """
-    raise NotImplementedError
+    parts = command.split()
+    if not parts:
+        raise ValueError("command cannot be empty")
+    operation, *arguments = parts
+    try:
+        numbers = [int(argument) for argument in arguments]
+    except ValueError as error:
+        raise ValueError("arguments must be integers") from error
+
+    match operation, numbers:
+        case "add", [a, b]:
+            return a + b
+        case "mul", [a, b]:
+            return a * b
+        case "neg", [a]:
+            return -a
+        case "sum", [*values] if values:
+            return sum(values)
+        case _:
+            raise ValueError("invalid calculator command")
 
 
 # -- functions --------------------------------------------------------------
@@ -151,7 +211,10 @@ def parse_int(text, default=None):
 
     Use try/except — do not test the characters yourself.
     """
-    raise NotImplementedError
+    try:
+        return int(text)
+    except (TypeError, ValueError):
+        return default
 
 
 def stats(*numbers):
@@ -163,7 +226,19 @@ def stats(*numbers):
 
     Write the loop yourself — no min(), max() or sum().
     """
-    raise NotImplementedError
+    if not numbers:
+        raise ValueError("at least one number is required")
+    smallest = largest = numbers[0]
+    total = 0
+    count = 0
+    for number in numbers:
+        if number < smallest:
+            smallest = number
+        if number > largest:
+            largest = number
+        total += number
+        count += 1
+    return smallest, largest, total / count
 
 
 def append_to(item, target=None):
@@ -178,7 +253,10 @@ def append_to(item, target=None):
     This is the mutable-default-argument trap from the manual. Do not write
     `target=[]`.
     """
-    raise NotImplementedError
+    if target is None:
+        target = []
+    target.append(item)
+    return target
 
 
 def make_multiplier(k):
@@ -187,7 +265,9 @@ def make_multiplier(k):
     triple = make_multiplier(3)
     triple(5)  -> 15
     """
-    raise NotImplementedError
+    def multiply(value):
+        return value * k
+    return multiply
 
 
 def apply_n(f, x, n):
@@ -196,4 +276,7 @@ def apply_n(f, x, n):
     apply_n(lambda v: v * 2, 1, 10)  -> 1024
     apply_n(str.upper, "hi", 0)      -> "hi"
     """
-    raise NotImplementedError
+    result = x
+    for _ in range(n):
+        result = f(result)
+    return result
